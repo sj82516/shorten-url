@@ -1,0 +1,46 @@
+extends layout
+
+block content
+    div
+        h2 輸入想要縮短的網址
+        input(type="text" placeholder="" value="http://" id="shorten-url-input")
+        button(id="shorten-url-btn") 送出
+        h2 以下是縮短的網址
+        a(href="/" id="shorten-url-output") 神奇的短網址等等就出現，雖然不一定比較短
+    div
+        h2 目前 Top 10 瀏覽縮網址
+        each web,i in pageRankList
+            div(style="padding: 10px; margin: 5px 0; border: 2px solid #00B7FF")
+                h4(style="color:#4C2EFF;margin: 0;") #{i+1}
+                span 短連結：
+                a(href="/api/shorten-url/#{web._id}") /api/shorten-url/#{web._id}
+                br
+                span 實際連結網站： #{web.url}
+                br
+                span 頁面瀏覽量：#{web.pageView}
+    script.
+        serverUrl = document.URL;
+
+        var shortenUrlInput = document.getElementById('shorten-url-input');
+        var shortenUrlBtn = document.getElementById('shorten-url-btn');
+        var shortenUrlOutput = document.getElementById('shorten-url-output');
+        shortenUrlBtn.addEventListener('click', function(evt){
+            evt.preventDefault();
+
+            var xhr = new XMLHttpRequest();
+             xhr.onreadystatechange = function(){
+                if(xhr.readyState == 4 && xhr.status == 200){
+                    console.log(xhr.responseText);
+                    var resposne = JSON.parse(xhr.responseText);
+                    var shortenUrl = serverUrl + 'api/shorten-url/' + resposne.data;
+                    shortenUrlOutput.href = shortenUrl;
+                    shortenUrlOutput.innerText = shortenUrl;
+
+                    shortenUrlInput.valueOf = 'http://';
+                }
+            }
+            xhr.open('POST', '/api/shorten-url');
+            xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+            xhr.send('url=' + shortenUrlInput.value);
+        });
+

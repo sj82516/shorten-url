@@ -1,0 +1,55 @@
+extends layout
+
+block content
+    h1 Admin
+    div
+        ul(id="url-list")
+            each web,i in urlList
+                li(id="#{web._id}")
+                    span 短連結代號
+                    span #{web._id}
+                    span 對應連結
+                    input(class="url-input" value="#{web.url}" target="_blank")
+                    span 瀏覽次數
+                    span #{web.pageView}
+                    button(class="update-btn" value="#{web._id}") 編輯
+                    button(class="delete-btn" value="#{web._id}") 刪除
+    script.
+        serverUrl = document.URL;
+
+        var updateBtnList = Array.from(document.getElementsByClassName('update-btn'));
+        var deleteBtnList = Array.from(document.getElementsByClassName('delete-btn'));
+
+        updateBtnList.map(function (updateBtn) {
+            updateBtn.addEventListener('click', function (evt) {
+                evt.preventDefault();
+                var btnValue = this.value;
+                var input = document.querySelector('#'+ btnValue +' .url-input');
+                console.log(input);
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+
+                    }
+                }
+                xhr.open('PUT', '/api/shorten-url');
+                xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+                xhr.send('url=' + input.value + "&_id=" + btnValue);
+            })
+        });
+
+        deleteBtnList.map(function (deleteBtn) {
+            deleteBtn.addEventListener('click', function (evt) {
+                evt.preventDefault();
+                var btnValue = this.value;
+
+                var xhr = new XMLHttpRequest();
+                xhr.onreadystatechange = function () {
+                    if (xhr.readyState == 4 && xhr.status == 200) {
+                        document.getElementById('url-list').removeChild(document.getElementById(btnValue));
+                    }
+                }
+                xhr.open('DELETE', '/api/shorten-url/' + btnValue);
+                xhr.send();
+            })
+        });
